@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - ERP System</title>
+    <link rel="stylesheet" href="css/all.min.css">
+    <link rel="stylesheet" href="css/framework.css">
+    <link rel="stylesheet" href="css/master.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .sidebar { transition: all 0.3s ease; position: relative; z-index: 1000; }
+        .sidebar.collapsed { margin-left: -250px; width: 250px; }
+        .page.sidebar-collapsed .sidebar { margin-left: -250px; }
+        .toggle-sidebar { background: none; border: none; cursor: pointer; font-size: 20px; color: #333; padding: 10px; }
+        .toggle-sidebar:hover { background-color: #f0f0f0; border-radius: 5px; }
+    <style>
+        .chart-container { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 20px; }
+        .export-btn { background-color: #27ae60; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; margin-bottom: 20px; }
+        .export-btn:hover { background-color: #1e8449; }
+    </style>
+</head>
+<body>
+    <div class="page d-flex">
+        <!-- Start Sidebar -->
+        <div class="sidebar bg-white p-20 p-relative">
+            <h3 class="p-relative txt-c mt-0">ERP System</h3>
+            <ul>
+                <li>
+                    <a class="d-flex align-center fs-14 c-black rad-6 p-10" href="index.html">
+                        <i class="fa-regular fa-chart-bar fa-fw"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="d-flex align-center fs-14 c-black rad-6 p-10" href="products.html">
+                        <i class="fa-solid fa-box fa-fw"></i>
+                        <span>Products</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="d-flex align-center fs-14 c-black rad-6 p-10" href="customers.html">
+                        <i class="fa-solid fa-users fa-fw"></i>
+                        <span>Customers</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="d-flex align-center fs-14 c-black rad-6 p-10" href="sales.html">
+                        <i class="fa-solid fa-receipt fa-fw"></i>
+                        <span>Sales/Invoices</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="d-flex align-center fs-14 c-black rad-6 p-10" href="inventory.html">
+                        <i class="fa-solid fa-warehouse fa-fw"></i>
+                        <span>Inventory</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="active d-flex align-center fs-14 c-black rad-6 p-10" href="reports.html">
+                        <i class="fa-solid fa-chart-line fa-fw"></i>
+                        <span>Reports</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <!-- End Sidebar -->
+        <div class="content w-full overflow-hidden">
+            <!-- Start Head -->
+            <div class="head bg-white p-15 between-flex">
+                <div class="d-flex align-center gap-20">
+                    <button class="toggle-sidebar" id="sidebarToggle" title="Toggle Sidebar">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <div class="search p-relative">
+                        <input class="p-10 main-border rad-10" type="search" placeholder="Search...">
+                    </div>
+                </div>
+                <div class="icons d-flex align-center gap-15">
+                    <span style="font-size: 13px; color: #666; font-weight: 500;">Welcome, <strong id="usernameDisplay">User</strong></span>
+                    <span class="notification p-relative">
+                        <i class="fa-regular fa-bell fa-lg"></i>
+                    </span>
+                    <img src="imgs/avatar.png" alt="" style="cursor: pointer;">
+                    <button id="logoutBtn" style="background: #e74c3c; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 13px;">
+                        <i class="fa-solid fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+            <!-- End Head -->
+            <h1 class="p-relative">Reports & Analytics</h1>
+
+            <div class="p-20 m-20">
+                <button class="export-btn" id="exportReportBtn">
+                    <i class="fa-solid fa-download"></i> Export Report
+                </button>
+
+                <div class="chart-grid">
+                    <!-- Monthly Sales Chart -->
+                    <div class="chart-container">
+                        <h2 class="mt-0 mb-20">Monthly Sales Trend</h2>
+                        <canvas id="monthlySalesChart" height="80"></canvas>
+                    </div>
+
+                    <!-- Top Selling Products Chart -->
+                    <div class="chart-container">
+                        <h2 class="mt-0 mb-20">Top 10 Selling Products</h2>
+                        <canvas id="topProductsChart" height="80"></canvas>
+                    </div>
+
+                    <!-- Revenue Pie Chart -->
+                    <div class="chart-container">
+                        <h2 class="mt-0 mb-20">Revenue by Category</h2>
+                        <div style="max-width: 400px; margin: 0 auto;">
+                            <canvas id="revenuePieChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Customer Distribution Chart -->
+                    <div class="chart-container">
+                        <h2 class="mt-0 mb-20">Sales by Payment Method</h2>
+                        <canvas id="paymentMethodChart" height="80"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const monthlySalesCtx = document.getElementById('monthlySalesChart').getContext('2d');
+        new Chart(monthlySalesCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [{
+                    label: 'Monthly Sales (₹)',
+                    data: [85000, 92000, 78000, 95000, 110000, 125000, 132000, 128000, 145000, 155000, 162000, 175000],
+                    borderColor: '#3498db',
+                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 6,
+                    pointBackgroundColor: '#3498db',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: { font: { size: 13 } }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 200000
+                    }
+                }
+            }
+        });
+
+        // Top Selling Products Bar Chart
+        const topProductsCtx = document.getElementById('topProductsChart').getContext('2d');
+        new Chart(topProductsCtx, {
+            type: 'bar',
+            data: {
+                labels: ['T-Shirt', 'Jeans', 'Laptop', 'Coffee Beans', 'Notebook', 'Wireless Mouse', 'JavaScript Book', 'Python Guide', 'Organic Tea', 'USB Cable'],
+                datasets: [{
+                    label: 'Units Sold',
+                    data: [450, 280, 85, 320, 610, 145, 195, 110, 220, 75],
+                    backgroundColor: [
+                        '#3498db', '#2ecc71', '#e74c3c', '#f39c12', '#9b59b6',
+                        '#1abc9c', '#e67e22', '#34495e', '#95a5a6', '#c0392b'
+                    ],
+                    borderColor: '#000',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: { font: { size: 13 } }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Revenue Pie Chart
+        const revenuePieCtx = document.getElementById('revenuePieChart').getContext('2d');
+        new Chart(revenuePieCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Electronics', 'Clothing', 'Food', 'Books', 'Other'],
+                datasets: [{
+                    data: [325000, 280000, 185000, 95000, 115000],
+                    backgroundColor: [
+                        '#3498db',
+                        '#2ecc71',
+                        '#e74c3c',
+                        '#f39c12',
+                        '#9b59b6'
+                    ],
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: { font: { size: 13 } }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed || 0;
+                                return label + ': ₹' + value.toLocaleString('en-IN');
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Payment Method Chart
+        const paymentMethodCtx = document.getElementById('paymentMethodChart').getContext('2d');
+        new Chart(paymentMethodCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Credit Card', 'Debit Card', 'Cash', 'Cheque', 'Bank Transfer', 'Digital Wallet'],
+                datasets: [{
+                    label: 'Sales Amount (₹)',
+                    data: [285000, 245000, 165000, 95000, 125000, 85000],
+                    backgroundColor: [
+                        '#3498db',
+                        '#2ecc71',
+                        '#e74c3c',
+                        '#f39c12',
+                        '#9b59b6',
+                        '#1abc9c'
+                    ],
+                    borderColor: '#000',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: { font: { size: 13 } }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 300000
+                    }
+                }
+            }
+        });
+
+        // Export Report Button
+        document.getElementById('exportReportBtn').addEventListener('click', function() {
+            const reportData = {
+                generatedDate: new Date().toLocaleDateString('en-IN'),
+                monthlySales: 1254000,
+                topProduct: 'T-Shirt (450 units)',
+                topCustomer: 'Robert Brown (₹42000)',
+                totalRevenue: 1000000,
+                totalExpense: 580000,
+                netProfit: 420000
+            };
+
+            const reportContent = `
+BUSINESS REPORT
+Generated: ${reportData.generatedDate}
+
+=== KEY METRICS ===
+Total Revenue: ₹${reportData.totalRevenue.toLocaleString('en-IN')}
+Total Expense: ₹${reportData.totalExpense.toLocaleString('en-IN')}
+Net Profit: ₹${reportData.netProfit.toLocaleString('en-IN')}
+Profit Margin: ${((reportData.netProfit/reportData.totalRevenue)*100).toFixed(2)}%
+
+=== TOP PERFORMERS ===
+Best Selling Product: ${reportData.topProduct}
+Best Customer: ${reportData.topCustomer}
+
+=== THIS MONTH ===
+Monthly Sales: ₹${reportData.monthlySales.toLocaleString('en-IN')}
+
+This report was generated from the ERP System.
+            `;
+
+            const element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(reportContent));
+            element.setAttribute('download', 'ERP_Report_' + new Date().getTime() + '.txt');
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+        });
+
+        // Collapsible Sidebar
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const page = document.querySelector('.page');
+        const sidebar = document.querySelector('.sidebar');
+
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            page.classList.toggle('sidebar-collapsed');
+        });
+
+        // Display username
+        const username = localStorage.getItem('username') || 'User';
+        document.getElementById('usernameDisplay').textContent = username;
+
+        // Logout functionality
+        document.getElementById('logoutBtn').onclick = () => {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        };
+    </script>
+</body>
+</html>

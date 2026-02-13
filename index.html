@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERP Dashboard</title>
+    <link rel="stylesheet" href="css/all.min.css">
+    <link rel="stylesheet" href="css/framework.css">
+    <link rel="stylesheet" href="css/master.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .sidebar { transition: all 0.3s ease; position: relative; z-index: 1000; }
+        .sidebar.collapsed { margin-left: -250px; width: 250px; }
+        .page.sidebar-collapsed .sidebar { margin-left: -250px; }
+        .toggle-sidebar { background: none; border: none; cursor: pointer; font-size: 20px; color: #333; padding: 10px; }
+        .toggle-sidebar:hover { background-color: #f0f0f0; border-radius: 5px; }
+    </style>
+    <script>
+        // Check if user is logged in
+        if (localStorage.getItem('user_logged_in') !== 'true') {
+            window.location.href = 'login.html';
+        }
+        // Check if session expired
+        const expiryTime = localStorage.getItem('expiry_time');
+        if (expiryTime && new Date().getTime() > parseInt(expiryTime)) {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+    </script>
+<body>
+    <div class="page d-flex">
+        <!-- Start Sidebar -->
+        <div class="sidebar bg-white p-20 p-relative">
+            <h3 class="p-relative txt-c mt-0">ERP System</h3>
+            <ul>
+                <li>
+                    <a class="active d-flex align-center fs-14 c-black rad-6 p-10" href="index.html">
+                        <i class="fa-regular fa-chart-bar fa-fw"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="d-flex align-center fs-14 c-black rad-6 p-10" href="products.html">
+                        <i class="fa-solid fa-box fa-fw"></i>
+                        <span>Products</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="d-flex align-center fs-14 c-black rad-6 p-10" href="customers.html">
+                        <i class="fa-solid fa-users fa-fw"></i>
+                        <span>Customers</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="d-flex align-center fs-14 c-black rad-6 p-10" href="sales.html">
+                        <i class="fa-solid fa-receipt fa-fw"></i>
+                        <span>Sales/Invoices</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="d-flex align-center fs-14 c-black rad-6 p-10" href="inventory.html">
+                        <i class="fa-solid fa-warehouse fa-fw"></i>
+                        <span>Inventory</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="d-flex align-center fs-14 c-black rad-6 p-10" href="reports.html">
+                        <i class="fa-solid fa-chart-line fa-fw"></i>
+                        <span>Reports</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <!-- End Sidebar -->
+        <div class="content w-full overflow-hidden">
+            <!-- Start Head -->
+            <div class="head bg-white p-15 between-flex">
+                <div class="d-flex align-center gap-20">
+                    <button class="toggle-sidebar" id="sidebarToggle" title="Toggle Sidebar">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <div class="search p-relative">
+                        <input class="p-10 main-border rad-10" type="search" placeholder="Search...">
+                    </div>
+                </div>
+                <div class="icons d-flex align-center gap-15">
+                    <span style="font-size: 13px; color: #666; font-weight: 500;">Welcome, <strong id="usernameDisplay">User</strong></span>
+                    <span class="notification p-relative">
+                        <i class="fa-regular fa-bell fa-lg"></i>
+                    </span>
+                    <img src="imgs/avatar.png" alt="" style="cursor: pointer;">
+                    <button id="logoutBtn" style="background: #e74c3c; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 13px;">
+                        <i class="fa-solid fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+            <!-- End Head -->
+            <h1 class="p-relative">Dashboard</h1>
+            <div class="wrapper d-grid gap-20">
+                <!-- Revenue Card -->
+                <div class="welcome bg-white rad-10 txt-c-mobile p-20">
+                    <div class="d-flex space-between align-center">
+                        <div>
+                            <h2 class="m-0">Total Revenue</h2>
+                            <p class="c-grey mt-5">This Month</p>
+                        </div>
+                        <i class="fa-solid fa-dollar-sign fa-3x c-blue"></i>
+                    </div>
+                    <div class="mt-20">
+                        <span class="d-block fs-25 fw-bold c-black">₹45,250</span>
+                        <span class="c-green mt-5 d-block">↑ 12% from last month</span>
+                    </div>
+                </div>
+
+                <!-- Total Customers Card -->
+                <div class="welcome bg-white rad-10 txt-c-mobile p-20">
+                    <div class="d-flex space-between align-center">
+                        <div>
+                            <h2 class="m-0">Total Customers</h2>
+                            <p class="c-grey mt-5">Active Accounts</p>
+                        </div>
+                        <i class="fa-solid fa-users fa-3x c-blue"></i>
+                    </div>
+                    <div class="mt-20">
+                        <span class="d-block fs-25 fw-bold c-black">1,248</span>
+                        <span class="c-blue mt-5 d-block">↑ 8% from last month</span>
+                    </div>
+                </div>
+
+                <!-- Total Products Card -->
+                <div class="welcome bg-white rad-10 txt-c-mobile p-20">
+                    <div class="d-flex space-between align-center">
+                        <div>
+                            <h2 class="m-0">Total Products</h2>
+                            <p class="c-grey mt-5">In Inventory</p>
+                        </div>
+                        <i class="fa-solid fa-box fa-3x c-blue"></i>
+                    </div>
+                    <div class="mt-20">
+                        <span class="d-block fs-25 fw-bold c-black">562</span>
+                        <span class="c-blue mt-5 d-block">18 categories</span>
+                    </div>
+                </div>
+
+                <!-- Low Stock Card -->
+                <div class="welcome bg-white rad-10 txt-c-mobile p-20">
+                    <div class="d-flex space-between align-center">
+                        <div>
+                            <h2 class="m-0">Low Stock Alert</h2>
+                            <p class="c-grey mt-5">Requires Attention</p>
+                        </div>
+                        <i class="fa-solid fa-exclamation-triangle fa-3x c-orange"></i>
+                    </div>
+                    <div class="mt-20">
+                        <span class="d-block fs-25 fw-bold c-black">34</span>
+                        <span class="c-orange mt-5 d-block">Products below threshold</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="d-grid gap-20 mt-20">
+                <!-- Monthly Sales Chart -->
+                <div class="bg-white rad-10 p-20">
+                    <h2 class="mt-0 mb-20">Monthly Sales</h2>
+                    <canvas id="monthlySalesChart" height="80"></canvas>
+                </div>
+
+                <!-- Revenue vs Expense Chart -->
+                <div class="bg-white rad-10 p-20">
+                    <h2 class="mt-0 mb-20">Revenue vs Expense</h2>
+                    <canvas id="revenueExpenseChart" height="80"></canvas>
+                </div>
+            </div>
+
+            <!-- Recent Orders Table -->
+            <div class="projects p-20 bg-white rad-10 m-20 mt-20">
+                <h2 class="mt-0 mb-20">Recent Orders</h2>
+                <div class="responsive-table">
+                    <table class="fs-15 w-full">
+                        <thead>
+                            <tr>
+                                <td>Order ID</td>
+                                <td>Customer</td>
+                                <td>Date</td>
+                                <td>Amount</td>
+                                <td>Status</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>#ORD001</td>
+                                <td>John Smith</td>
+                                <td>12 Feb 2026</td>
+                                <td>₹2,500</td>
+                                <td><span class="label bg-green c-white btn-shape">Completed</span></td>
+                            </tr>
+                            <tr>
+                                <td>#ORD002</td>
+                                <td>Sarah Johnson</td>
+                                <td>11 Feb 2026</td>
+                                <td>₹1,800</td>
+                                <td><span class="label bg-blue c-white btn-shape">Pending</span></td>
+                            </tr>
+                            <tr>
+                                <td>#ORD003</td>
+                                <td>Mike Davis</td>
+                                <td>10 Feb 2026</td>
+                                <td>₹3,200</td>
+                                <td><span class="label bg-green c-white btn-shape">Completed</span></td>
+                            </tr>
+                            <tr>
+                                <td>#ORD004</td>
+                                <td>Emily Wilson</td>
+                                <td>09 Feb 2026</td>
+                                <td>₹950</td>
+                                <td><span class="label bg-orange c-white btn-shape">Processing</span></td>
+                            </tr>
+                            <tr>
+                                <td>#ORD005</td>
+                                <td>Robert Brown</td>
+                                <td>08 Feb 2026</td>
+                                <td>₹4,100</td>
+                                <td><span class="label bg-green c-white btn-shape">Completed</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const monthlySalesCtx = document.getElementById('monthlySalesChart').getContext('2d');
+        new Chart(monthlySalesCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [{
+                    label: 'Sales Amount (₹)',
+                    data: [12000, 15000, 18000, 14000, 22000, 25000, 28000, 26000, 30000, 32000, 35000, 38000],
+                    borderColor: '#3498db',
+                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 5,
+                    pointBackgroundColor: '#3498db',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: { font: { size: 13 } }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 40000
+                    }
+                }
+            }
+        });
+
+        // Revenue vs Expense Chart
+        const revenueExpenseCtx = document.getElementById('revenueExpenseChart').getContext('2d');
+        new Chart(revenueExpenseCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [
+                    {
+                        label: 'Revenue (₹)',
+                        data: [12000, 15000, 18000, 14000, 22000, 25000, 28000, 26000, 30000, 32000, 35000, 38000],
+                        backgroundColor: '#27ae60',
+                        borderColor: '#27ae60',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Expense (₹)',
+                        data: [8000, 10000, 12000, 9000, 15000, 16000, 18000, 15000, 19000, 20000, 21000, 23000],
+                        backgroundColor: '#e74c3c',
+                        borderColor: '#e74c3c',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: { font: { size: 13 } }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 40000
+                    }
+                }
+            }
+        });
+
+        // Collapsible Sidebar
+        // Sidebar toggle functionality
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const page = document.querySelector('.page');
+        const sidebar = document.querySelector('.sidebar');
+
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            page.classList.toggle('sidebar-collapsed');
+        });
+
+        // Display username
+        const username = localStorage.getItem('username') || 'User';
+        document.getElementById('usernameDisplay').textContent = username;
+
+        // Logout functionality
+        document.getElementById('logoutBtn').onclick = () => {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        };
+    </script>
+    </script>
+</body>
+</html>
